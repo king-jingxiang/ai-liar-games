@@ -1,3 +1,5 @@
+# Copyright (c) 2024 King Jingxiang
+# See the LICENSE file for license rights and limitations (MIT).
 rule = """请你扮演一个游戏角色来完成游戏！
 ### 游戏规则
 

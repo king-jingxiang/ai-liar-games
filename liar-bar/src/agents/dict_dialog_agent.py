@@ -1,3 +1,5 @@
+# Copyright (c) 2024 King Jingxiang
+# See the LICENSE file for license rights and limitations (MIT).
 from typing import Optional, Union, Sequence
 
 from agentscope.message import Msg
