@@ -21,14 +21,14 @@ def display_player_status(player, game):
         if game.player_status[player]["style"] == "user":
             st.write(f"你手里牌分别为: [{', '.join(game.player_cards[player])}]")
         else:
-            st.write(f"你现在手里有 {len(game.player_cards[player])} 张牌")
+            st.write(f"你手里牌分别为 {game.player_cards[player]}")
             st.write(f"你现在的扮演的角色为: {game.player_status[player]['style']}")
             if game.current_player == player:
                 st.markdown('<h3 style="color:blue;font-size:30px;">智能体思考中……</h3>', unsafe_allow_html=True)
         # 显示最近一次出牌情况
         for play in reversed(game.current_round):
             if play["player"] == player:
-                st.write(f'<h3 style="color:green;font-size:30px;">刚刚你打出了{len(play['cards'])}张目标牌</h3>',
+                st.write(f'<h3 style="color:green;font-size:30px;">刚刚你打出了{len(play["cards"])}张目标牌</h3>',
                          unsafe_allow_html=True)
                 break  # 只显示最后一次
     st.write("---")
@@ -67,7 +67,7 @@ def main():
     st.set_page_config(page_title="Card Game Interface", layout="wide")
     st.title("🎴 卡牌游戏界面")
     st.write(
-        "这一关将会标记每个智能体所扮演的角色，并且会把智能体思考的过程公开，方便用户快速了解游戏规则和智能体特点！本局游戏你作为Player2，请尽情玩耍吧！！！")
+        "这一关将会标记每个智能体所扮演的角色以及手牌，并且会把智能体思考的过程公开，方便用户快速了解游戏规则和智能体特点！本局游戏你作为Player2，请尽情玩耍吧！！！")
     st.write('tips: 有时候可能会卡住没有刷新最新的结果，请点击"点我刷新"按钮手动刷新')
     with st.sidebar:
         api_key = st.text_input("AIStudio API Key", key="chatbot_api_key", type="password")

@@ -29,7 +29,7 @@ def display_player_status(player, game):
         # 显示最近一次出牌情况
         for play in reversed(game.current_round):
             if play["player"] == player:
-                st.write(f'<h3 style="color:green;font-size:30px;">刚刚你打出了{len(play['cards'])}张目标牌</h3>',
+                st.write(f'<h3 style="color:green;font-size:30px;">刚刚你打出了{len(play["cards"])}张目标牌</h3>',
                          unsafe_allow_html=True)
                 break  # 只显示最后一次
     st.write("---")
@@ -98,8 +98,8 @@ def main():
             init_model(api_key)
             game.initialize_agents()
             random.seed(time.time())
-            game.initialize_players([random.choice(game.agents)["name"], "user",
-                                     random.choice(game.agents)["name"], random.choice(game.agents)["name"]])
+            game.initialize_players([random.choice(game.agents).name, "user",
+                                     random.choice(game.agents).name, random.choice(game.agents).name])
             st.session_state["game_started"] = True
             game.start_new_round()  # 点击开始按钮后，启动游戏
 
@@ -141,7 +141,6 @@ def main():
             action, cards, thought, dialog = game.player_think()
             if action == game.action_space[1]:
                 game.play(action, cards, thought, dialog)
-                time.sleep(5)
             else:
                 game.play(action, cards, thought, dialog)
             st.experimental_rerun()

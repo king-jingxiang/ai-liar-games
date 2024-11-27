@@ -29,7 +29,9 @@ class Game:
         self.player_cards = {}
         self.player_dialog = []
         self.challenge_info = []
-        self.game_logs = []
+        self.game_logs = {}
+        self.round = 1
+        self.current_game_logs = []
         self.current_player = "player1"
         self.total_cards = ["A", "K", "Q"] * 6
         self.target_card = ""
@@ -41,9 +43,9 @@ class Game:
     def initialize_agents(self):
 
         agents = [
-            DictDialogAgent("coward", rule.rule + "\n" + rule.coward_role, self.model_configuration_name,
-                            use_memory=False),
             DictDialogAgent("augur", rule.rule + "\n" + rule.augur_role, self.model_configuration_name,
+                            use_memory=False),
+            DictDialogAgent("coward", rule.rule + "\n" + rule.coward_role, self.model_configuration_name,
                             use_memory=False),
             DictDialogAgent("bold_gambler", rule.rule + "\n" + rule.bold_gambler_rule, self.model_configuration_name,
                             use_memory=False),
@@ -105,7 +107,7 @@ class Game:
         try:
             user_cards = copy.deepcopy(self.player_cards[self.current_player])
             for c in played_cards:
-                user_cards.remove(c)
+                user_cards.remove(c.upper())
             return True
         except ValueError:
             return False
@@ -151,30 +153,48 @@ class Game:
     def _add_to_current_round(self, action, cards=None, thought=None, dialog=None):
         """添加当前轮次的玩家动作和卡牌"""
         self.current_round.append({"player": self.current_player, "action": action, "cards": cards or []})
-        self.game_logs.append(
+        self.current_game_logs.append(
             {"player": self.current_player, "action": action, "cards": cards or [], "thought": thought,
              "dialog": dialog})
 
     def turn_new_round(self):
         """结束当前轮次并开始新的一轮"""
+        self.round += 1
+        self.game_logs[self.round] = self.current_game_logs.copy()
         self.total_rounds.append(self.current_round.copy())
         self.current_round.clear()
+        self.current_game_logs.clear()
         self.start_new_round()
 
     def get_current_round(self):
         """获取当前轮次的信息"""
         info = ""
-        for entry in self.current_round:
-            info += f"{entry['player']} play {len(entry['cards'])}张目标牌{self.target_card}\n"
+        for entry in self.current_game_logs:
+            if len(entry['cards']) == 0:
+                info += f"{entry['player']} 选择了质疑！"
+            else:
+                info += f"{entry['player']} play {len(entry['cards'])}张目标牌！"
+            if entry["dialog"]:
+                info += f"并且对大家说: {entry['dialog']}\n"
+            else:
+                info += "\n"
         return info
 
     def get_game_logs(self, debug=False):
+        info = "本轮次：\n"
+        info += self._get_logs_info(self.current_game_logs, debug)
+        if len(self.game_logs) > 0:
+            info += "\n上一轮次: \n"
+            max_key = max(self.game_logs.keys())
+            info += self._get_logs_info(self.game_logs[max_key], debug)
+        return info
+
+    def _get_logs_info(self, game_logs, debug=False):
         # 使用不同的颜色定义每条记录
         colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#C70039"]  # 示例颜色列表
         color_index = 0  # 用于循环选择颜色
-
         info = "<div>"
-        for entry in self.game_logs:
+        for entry in game_logs:
             # 选择颜色，并确保颜色索引在有效范围内循环
             color = colors[color_index % len(colors)]
             color_index += 1
@@ -195,7 +215,6 @@ class Game:
 
             # 将当前记录添加到总信息中
             info += log_info
-
         info += "</div>"
         return info
 
@@ -257,7 +276,7 @@ class Game:
         """显示每个玩家的卡牌"""
         print(f"Target card: {self.target_card}")
         for player, cards in self.player_cards.items():
-            print(f"{player} has cards: {cards}")
+            print(f"{player} role is {self.player_status[player]['style']} and has cards: {cards}")
 
     def _eliminate_check(self, player):
         """检查玩家是否被淘汰"""
@@ -275,6 +294,7 @@ class Game:
         current_index = self.players.index(current_player)
         # 计算下一个玩家的索引，使用取余运算来循环遍历列表
         next_index = (current_index + 1) % len(self.players)
+        # TODO is_alive=Fase or player_cards为空
         while not self.player_status[self.players[next_index]]["is_alive"]:
             next_index = (next_index + 1) % len(self.players)
         # 返回下一个玩家

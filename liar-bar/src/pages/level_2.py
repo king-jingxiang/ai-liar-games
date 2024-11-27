@@ -28,7 +28,7 @@ def display_player_status(player, game):
         # 显示最近一次出牌情况
         for play in reversed(game.current_round):
             if play["player"] == player:
-                st.write(f'<h3 style="color:green;font-size:30px;">刚刚你打出了{len(play['cards'])}张目标牌</h3>',
+                st.write(f'<h3 style="color:green;font-size:30px;">刚刚你打出了{len(play["cards"])}张目标牌</h3>',
                          unsafe_allow_html=True)
                 break  # 只显示最后一次
     st.write("---")
@@ -138,7 +138,6 @@ def main():
             action, cards, thought, dialog = game.player_think()
             if action == game.action_space[1]:
                 game.play(action, cards, thought, dialog)
-                time.sleep(5)
             else:
                 game.play(action, cards, thought, dialog)
             st.experimental_rerun()
